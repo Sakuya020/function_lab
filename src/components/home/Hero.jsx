@@ -1,4 +1,5 @@
 "use client";
+import { useRef, useEffect } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -6,6 +7,25 @@ import { SplitText } from "gsap/SplitText";
 import { renderStarEmphasis } from "@/lib/utils";
 
 const Hero = ({ src, poster, info }) => {
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    // Safari 视频自动播放修复
+    const video = videoRef.current;
+    if (video) {
+      // 尝试播放视频
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((error) => {
+          // 自动播放被阻止，尝试静音后重新播放
+          console.log("Autoplay prevented, attempting muted playback:", error);
+          video.muted = true;
+          video.play().catch((e) => console.log("Playback failed:", e));
+        });
+      }
+    }
+  }, []);
+
   useGSAP(() => {
     gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -51,14 +71,17 @@ const Hero = ({ src, poster, info }) => {
     <section className="hero relative">
       <figure className="flex h-screen w-full items-center justify-center">
         <video
+          ref={videoRef}
           autoPlay
           muted
           loop
           playsInline
+          preload="auto"
           poster={poster}
           className="w-full h-full object-cover hero-video"
+          webkit-playsinline="true"
         >
-          <source src={src} />
+          <source src={src} type="video/mp4" />
         </video>
       </figure>
 
