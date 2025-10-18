@@ -1,4 +1,5 @@
 "use client";
+import { useRef, useEffect } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -6,6 +7,23 @@ import { SplitText } from "gsap/SplitText";
 import { renderStarEmphasis } from "@/lib/utils";
 
 const MobileHero = ({ src, poster, info }) => {
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    // Safari 视频自动播放修复
+    const video = videoRef.current;
+    if (video) {
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((error) => {
+          console.log("Autoplay prevented, attempting muted playback:", error);
+          video.muted = true;
+          video.play().catch((e) => console.log("Playback failed:", e));
+        });
+      }
+    }
+  }, []);
+
   useGSAP(() => {
     gsap.registerPlugin(ScrollTrigger, SplitText);
     // 刷新 ScrollTrigger 确保正确计算
@@ -61,14 +79,17 @@ const MobileHero = ({ src, poster, info }) => {
     <section className="mobile-hero relative flex min-h-[100dvh] items-center justify-center overflow-hidden pb-[env(safe-area-inset-bottom)]">
       <div className="mobile-hero-frame">
         <video
+          ref={videoRef}
           autoPlay
           muted
           loop
           playsInline
+          preload="auto"
           poster={poster}
           className="mobile-hero-video w-full object-cover"
+          webkit-playsinline="true"
         >
-          <source src={src} />
+          <source src={src} type="video/mp4" />
         </video>
       </div>
 
