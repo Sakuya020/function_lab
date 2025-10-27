@@ -10,20 +10,64 @@ const Hero = ({ src, poster, info }) => {
   const videoRef = useRef(null);
 
   useEffect(() => {
-    // Safari 视频自动播放修复
     const video = videoRef.current;
-    if (video) {
-      // 尝试播放视频
+    if (!video) return;
+
+    video.muted = true;
+    let hasPlayed = false;
+
+    // 尝试自动播放
+    const attemptAutoPlay = () => {
+      if (hasPlayed) return;
+
       const playPromise = video.play();
       if (playPromise !== undefined) {
-        playPromise.catch((error) => {
-          // 自动播放被阻止，尝试静音后重新播放
-          console.log("Autoplay prevented, attempting muted playback:", error);
-          video.muted = true;
-          video.play().catch((e) => console.log("Playback failed:", e));
-        });
+        playPromise
+          .then(() => {
+            hasPlayed = true;
+          })
+          .catch((error) => {
+            console.log(
+              "Autoplay blocked, waiting for user interaction:",
+              error
+            );
+          });
       }
+    };
+
+    // 用户交互后立即播放（无感知）
+    const playOnInteraction = () => {
+      if (hasPlayed || !video.paused) return;
+
+      video
+        .play()
+        .then(() => {
+          hasPlayed = true;
+        })
+        .catch((err) => console.log("Play failed:", err));
+    };
+
+    // 监听多种用户交互事件
+    const events = ["click", "scroll", "touchstart", "mousemove", "keydown"];
+    events.forEach((event) => {
+      document.addEventListener(event, playOnInteraction, {
+        once: true,
+        passive: true,
+      });
+    });
+
+    // 立即尝试自动播放
+    if (video.readyState >= 3) {
+      attemptAutoPlay();
+    } else {
+      video.addEventListener("loadeddata", attemptAutoPlay, { once: true });
     }
+
+    return () => {
+      events.forEach((event) => {
+        document.removeEventListener(event, playOnInteraction);
+      });
+    };
   }, []);
 
   useGSAP(() => {
@@ -33,7 +77,7 @@ const Hero = ({ src, poster, info }) => {
       scrollTrigger: {
         trigger: ".hero",
         start: "top top",
-        end: "+=300%",
+        end: "+=400%",
         scrub: 1,
         pin: true,
         pinSpacing: "margin",
@@ -52,7 +96,7 @@ const Hero = ({ src, poster, info }) => {
       .fromTo(
         ".hero-info",
         { y: "107vh" },
-        { y: "80vh", ease: "power1.inOut", duration: 1 },
+        { y: "73vh", ease: "power1.inOut", duration: 1 },
         "<5%"
       )
       .to(
