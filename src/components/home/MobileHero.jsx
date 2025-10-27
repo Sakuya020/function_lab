@@ -10,18 +10,60 @@ const MobileHero = ({ src, poster, info }) => {
   const videoRef = useRef(null);
 
   useEffect(() => {
-    // Safari 视频自动播放修复
     const video = videoRef.current;
-    if (video) {
+    if (!video) return;
+
+    video.muted = true;
+    let hasPlayed = false;
+
+    const attemptAutoPlay = () => {
+      if (hasPlayed) return;
+
       const playPromise = video.play();
       if (playPromise !== undefined) {
-        playPromise.catch((error) => {
-          console.log("Autoplay prevented, attempting muted playback:", error);
-          video.muted = true;
-          video.play().catch((e) => console.log("Playback failed:", e));
-        });
+        playPromise
+          .then(() => {
+            hasPlayed = true;
+          })
+          .catch((error) => {
+            console.log(
+              "Autoplay blocked, waiting for user interaction:",
+              error
+            );
+          });
       }
+    };
+
+    const playOnInteraction = () => {
+      if (hasPlayed || !video.paused) return;
+
+      video
+        .play()
+        .then(() => {
+          hasPlayed = true;
+        })
+        .catch((err) => console.log("Play failed:", err));
+    };
+
+    const events = ["click", "scroll", "touchstart", "mousemove", "keydown"];
+    events.forEach((event) => {
+      document.addEventListener(event, playOnInteraction, {
+        once: true,
+        passive: true,
+      });
+    });
+
+    if (video.readyState >= 3) {
+      attemptAutoPlay();
+    } else {
+      video.addEventListener("loadeddata", attemptAutoPlay, { once: true });
     }
+
+    return () => {
+      events.forEach((event) => {
+        document.removeEventListener(event, playOnInteraction);
+      });
+    };
   }, []);
 
   useGSAP(() => {
@@ -34,7 +76,7 @@ const MobileHero = ({ src, poster, info }) => {
       scrollTrigger: {
         trigger: ".mobile-hero",
         start: "top top",
-        end: "+=150%",
+        end: "+=130%",
         scrub: 1,
         pin: true,
         pinSpacing: "margin",
@@ -55,13 +97,13 @@ const MobileHero = ({ src, poster, info }) => {
     tl.fromTo(
       ".mobile-hero-video",
       { scale: 1, yPercent: 0 },
-      { scale: 1.8, yPercent: -65, ease: "power1.inOut", duration: 1 }
+      { scale: 1.8, yPercent: -100, ease: "power1.inOut", duration: 1 }
     )
       .fromTo(
         ".mobile-hero-info",
         { y: "76vh" },
-        { y: "71vh", ease: "power1.inOut", duration: 1 },
-        "<0.3"
+        { y: "71vh", ease: "power1.inOut", duration: 0.9 },
+        "<0.2"
       )
       .to(
         split.words,
