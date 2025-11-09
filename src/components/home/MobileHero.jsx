@@ -76,7 +76,7 @@ const MobileHero = ({ src, poster, info }) => {
       scrollTrigger: {
         trigger: ".mobile-hero",
         start: "top top",
-        end: "+=150%",
+        end: "+=130%",
         scrub: 1,
         pin: true,
         pinSpacing: "margin",
@@ -97,13 +97,13 @@ const MobileHero = ({ src, poster, info }) => {
     tl.fromTo(
       ".mobile-hero-video",
       { scale: 1, yPercent: 0 },
-      { scale: 1.8, yPercent: -65, ease: "power1.inOut", duration: 1 }
+      { scale: 1.8, yPercent: -100, ease: "power1.inOut", duration: 1 }
     )
       .fromTo(
         ".mobile-hero-info",
         { y: "76vh" },
-        { y: "71vh", ease: "power1.inOut", duration: 1 },
-        "<0.3"
+        { y: "71vh", ease: "power1.inOut", duration: 0.9 },
+        "<0.2"
       )
       .to(
         split.words,
