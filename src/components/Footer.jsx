@@ -36,7 +36,7 @@ const Footer = () => {
       </div>
       {/* phone */}
       <div className="md:hidden flex justify-between items-center h-[65px] border-t">
-        <div>© Function Lab 2026</div>
+        <div>© Function Lab 2026 </div>
         <div>
           <Link
             href="https://www.instagram.com/function_lab_design/"
@@ -57,7 +57,7 @@ const Footer = () => {
       </div>
       {/* tablet and desktop */}
       <div className="hidden md:grid grid-cols-12 items-center h-[89px] border-t lg:text-[22px] lg:leading-[28px]">
-        <div className="col-span-6 lg:col-span-9">© Function Lab 2026</div>
+        <div className="col-span-6 lg:col-span-9">© Function Lab 2026 </div>
         {/* 占据剩余空间 */}
         <div className="col-start-* col-span-6 lg:col-span-3 flex justify-between">
           <Link
